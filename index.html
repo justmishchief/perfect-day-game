@@ -3,8 +3,8 @@
 <head>
 <title>My Perfect Day</title>
 <style>
-  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#FFF6E3; font-family: sans-serif; }
-  canvas { border: 4px solid #6B4226; image-rendering: pixelated; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#2c1810; font-family: sans-serif; }
+  canvas { border: 4px solid #d4a373; image-rendering: pixelated; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
@@ -18,10 +18,13 @@ const colors = {
   1: '#1a1a1a',
   2: '#F2C6A0',
   3: '#3B82C4',
-  4: '#000000'
+  4: '#000000',
+  5: '#FFFFFF',
+  6: '#E76F51',
+  7: '#E9C46A'
 };
 
-const sprite = [
+const standingSprite = [
   [0,0,1,1,1,1,1,1,0,0],
   [0,1,1,1,1,1,1,1,1,0],
   [1,1,1,1,1,1,1,1,1,1],
@@ -37,136 +40,248 @@ const sprite = [
   [0,0,1,0,0,0,0,1,0,0]
 ];
 
-const stations = [
-  {name: "1. Wake Up & Chai", text: "Had a fresh morning tea!", x: 50, y: 50, w:60, h:60, color:"#F4A261", done:false},
-  {name: "2. Hackathon & Code", text: "Built awesome features!", x: 500, y: 50, w:60, h:60, color:"#8AB17D", done:false},
-  {name: "3. Friends + Dinner", text: "Celebrated with good food!", x: 500, y: 350, w: 60, h:60, color:"#E07A5F", done:false},
+const sleepingSprite = [
+  [0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,1,1,1,1,0,0,0,0,0,0,0],
+  [0,1,1,2,2,1,1,0,0,0,0,0,0],
+  [1,1,2,4,2,2,1,1,0,0,0,0,0],
+  [1,1,2,2,2,2,1,1,5,5,5,5,5],
+  [0,1,1,2,2,1,1,5,5,5,5,5,5],
+  [0,0,1,1,1,1,5,5,5,5,5,5,5],
+  [0,0,0,0,0,5,5,5,5,5,5,5,5]
 ];
 
-const pixelScale = 6;
-const playerWidth = 10 * pixelScale;
-const playerHeight = 13 * pixelScale;
-let playerX = 280;
-let playerY = 200;
-const speed = 4;
+const sittingSprite = [
+  [0,0,1,1,1,1,1,1,0,0],
+  [0,1,1,1,1,1,1,1,1,0],
+  [1,1,1,1,1,1,1,1,1,1],
+  [1,1,2,2,2,2,2,2,1,1],
+  [1,1,2,4,2,2,4,2,1,1],
+  [1,1,2,2,2,2,2,2,1,1],
+  [0,0,3,3,3,3,3,3,0,0],
+  [0,3,3,3,3,3,3,3,3,0],
+  [0,3,3,3,3,3,3,3,3,0],
+  [0,0,1,1,1,1,1,1,0,0],
+  [0,0,1,0,0,0,0,1,0,0]
+];
 
-let activePrompt = "";
-let currentDialog = "Goal: Visit all stations to finish your Perfect Day!";
+const friendSprite = [
+  [0,0,6,6,6,6,6,6,0,0],
+  [0,6,6,6,6,6,6,6,6,0],
+  [6,6,6,6,6,6,6,6,6,6],
+  [6,6,2,2,2,2,2,2,6,6],
+  [6,6,2,4,2,2,4,2,6,6],
+  [6,6,2,2,2,2,2,2,6,6],
+  [0,6,2,2,2,2,2,2,6,0],
+  [0,0,7,7,7,7,7,7,0,0],
+  [0,7,7,7,7,7,7,7,7,0],
+  [0,7,7,7,7,7,7,7,7,0],
+  [0,7,7,7,7,7,7,7,7,0],
+  [0,0,1,0,0,0,0,1,0,0],
+  [0,0,1,0,0,0,0,1,0,0]
+];
+
+const pixelScale = 4;
+let gameState = "SLEEPING";
+let playerX = 85;
+let playerY = 90;
+let speed = 3;
+let taskProgress = 0;
+let promptText = "Press SPACE to Wake Up & Start Your Day!";
+let dialogText = "Zzz... Fast asleep in bed.";
 
 const keysPressed = {};
 
-window.addEventListener('keydown', (e) => { 
-  keysPressed[e.key] = true; 
+window.addEventListener('keydown', (e) => {
+  keysPressed[e.key] = true;
   if (e.key === " " || e.key === "e" || e.key === "E") {
-    interact();
+    handleAction();
   }
 });
 
-window.addEventListener('keyup', (e) => { 
-  keysPressed[e.key] = false; 
+window.addEventListener('keyup', (e) => {
+  keysPressed[e.key] = false;
 });
 
-function checkOverlap(station) {
-  return (
-    playerX < station.x + station.w + 10 &&
-    playerX + playerWidth > station.x - 10 &&
-    playerY < station.y + station.h + 10 &&
-    playerY + playerHeight > station.y - 10
-  );
-}
+function handleAction() {
+  if (gameState === "SLEEPING") {
+    gameState = "FREE";
+    playerX = 80;
+    playerY = 160;
+    dialogText = "Good morning! Head to the study desk to hack & study.";
+    promptText = "";
+    return;
+  }
 
-function interact() {
-  stations.forEach(station => {
-    if (checkOverlap(station) && !station.done) {
-      station.done = true;
-      currentDialog = station.text;
+  if (gameState === "FREE") {
+    if (playerX > 430 && playerX < 530 && playerY > 50 && playerY < 130) {
+      gameState = "STUDYING";
+      taskProgress = 0;
+      dialogText = "Coding hard for the hackathon... Keep pressing SPACE to finish!";
+    } else if (playerX > 400 && playerX < 540 && playerY > 260 && playerY < 360) {
+      if (taskProgress >= 100) {
+        gameState = "DINING";
+        taskProgress = 0;
+        dialogText = "Having dinner and laughing with your best friend!";
+      } else {
+        dialogText = "You need to finish your study & code task first!";
+      }
     }
-  });
+    return;
+  }
+
+  if (gameState === "STUDYING") {
+    taskProgress += 25;
+    if (taskProgress >= 100) {
+      gameState = "FREE";
+      playerX = 420;
+      playerY = 130;
+      dialogText = "Coding completed! Now go down to meet your friend for dinner.";
+    }
+    return;
+  }
+
+  if (gameState === "DINING") {
+    taskProgress += 25;
+    if (taskProgress >= 100) {
+      gameState = "WIN";
+      dialogText = "You finished your tasks and enjoyed your evening. The Perfect Day!";
+    }
+  }
 }
 
 function update() {
+  if (gameState !== "FREE") return;
+
   if (keysPressed['ArrowUp'] || keysPressed['w']) playerY -= speed;
   if (keysPressed['ArrowDown'] || keysPressed['s']) playerY += speed;
   if (keysPressed['ArrowLeft'] || keysPressed['a']) playerX -= speed;
   if (keysPressed['ArrowRight'] || keysPressed['d']) playerX += speed;
 
-  if (playerX < 0) playerX = 0;
-  if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
-  if (playerY < 0) playerY = 0;
-  if (playerY + playerHeight > canvas.height) playerY = canvas.height - playerHeight;
+  if (playerX < 20) playerX = 20;
+  if (playerX > 580) playerX = 580;
+  if (playerY < 30) playerY = 30;
+  if (playerY > 370) playerY = 370;
 
-  activePrompt = "";
-  stations.forEach(station => {
-    if (checkOverlap(station) && !station.done) {
-      activePrompt = `Press SPACE to complete: ${station.name}`;
-    }
-  });
-}
-
-function drawWorld() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  stations.forEach(station => {
-    ctx.fillStyle = station.done ? "#A0A0A0" : station.color;
-    ctx.fillRect(station.x, station.y, station.w, station.h);
-    
-    ctx.strokeStyle = "#4A3525";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(station.x, station.y, station.w, station.h);
-
-    ctx.fillStyle = "#2B2B2B";
-    ctx.font = "bold 11px sans-serif";
-    ctx.fillText(station.name, station.x - 15, station.y - 8);
-    
-    if (station.done) {
-      ctx.fillStyle = "#27ae60";
-      ctx.fillText("✓ Done", station.x + 10, station.y + 35);
-    }
-  });
-
-  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.fillRect(20, 420, 600, 45);
-  ctx.strokeStyle = "#6B4226";
-  ctx.strokeRect(20, 420, 600, 45);
-
-  ctx.fillStyle = "#333";
-  ctx.font = "13px sans-serif";
-  ctx.fillText(activePrompt ? activePrompt : currentDialog, 35, 447);
-
-  const allDone = stations.every(s => s.done);
-  if (allDone) {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#FFF";
-    ctx.font = "bold 26px sans-serif";
-    ctx.fillText("✨ Perfect Day Complete! ✨", 140, 230);
-
-    ctx.font = "15px sans-serif";
-    ctx.fillText("You balanced health, work, and relationships!", 160, 265);
+  promptText = "";
+  if (playerX > 430 && playerX < 530 && playerY > 50 && playerY < 130) {
+    promptText = taskProgress < 100 ? "Press SPACE to Sit & Code" : "Coding Done!";
+  } else if (playerX > 400 && playerX < 540 && playerY > 260 && playerY < 360) {
+    promptText = "Press SPACE to Eat Dinner with Friend";
   }
 }
 
-function drawSprite(grid, offsetX, offsetY, pixelSize) {
-  for (let row = 0; row < grid.length; row++) {
-    for (let col = 0; col < grid[row].length; col++) {
-      const colorCode = grid[row][col];
-      if (colorCode === 0) continue;
-      ctx.fillStyle = colors[colorCode];
-      ctx.fillRect(
-        offsetX + col * pixelSize,
-        offsetY + row * pixelSize,
-        pixelSize,
-        pixelSize
-      );
+function drawSprite(grid, offsetX, offsetY, scale) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) {
+      const code = grid[r][c];
+      if (code === 0) continue;
+      ctx.fillStyle = colors[code];
+      ctx.fillRect(offsetX + c * scale, offsetY + r * scale, scale, scale);
     }
+  }
+}
+
+function drawRoom() {
+  ctx.fillStyle = "#faedcd";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#d4a373";
+  for (let i = 0; i < canvas.height; i += 32) {
+    ctx.fillRect(0, i, canvas.width, 2);
+  }
+
+  ctx.fillStyle = "#ccd5ae";
+  ctx.fillRect(40, 60, 110, 80);
+  ctx.fillStyle = "#e9d8a6";
+  ctx.fillRect(45, 65, 30, 70);
+  ctx.fillStyle = "#3d405b";
+  ctx.font = "bold 12px sans-serif";
+  ctx.fillText("Bed", 80, 50);
+
+  ctx.fillStyle = "#9c6644";
+  ctx.fillRect(460, 60, 120, 70);
+  ctx.fillStyle = "#2b2d42";
+  ctx.fillRect(500, 75, 40, 26);
+  ctx.fillStyle = "#64dfdf";
+  ctx.fillRect(503, 78, 34, 20);
+  ctx.fillStyle = "#3d405b";
+  ctx.fillText("Study / Code Desk", 460, 50);
+
+  ctx.fillStyle = "#b08968";
+  ctx.fillRect(440, 270, 140, 75);
+  ctx.fillStyle = "#e63946";
+  ctx.beginPath();
+  ctx.arc(490, 305, 14, 0, Math.PI * 2);
+  ctx.arc(530, 305, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#3d405b";
+  ctx.fillText("Dinner Table", 470, 260);
+
+  drawSprite(friendSprite, 530, 240, 4);
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
+  ctx.fillRect(15, 415, 610, 55);
+  ctx.strokeStyle = "#6B4226";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(15, 415, 610, 55);
+
+  ctx.fillStyle = "#1d3557";
+  ctx.font = "bold 13px sans-serif";
+  ctx.fillText(promptText ? promptText : dialogText, 30, 447);
+
+  if (gameState === "STUDYING" || gameState === "DINING") {
+    ctx.fillStyle = "#ddd";
+    ctx.fillRect(450, 430, 150, 20);
+    ctx.fillStyle = "#2a9d8f";
+    ctx.fillRect(450, 430, (taskProgress / 100) * 150, 20);
+    ctx.strokeStyle = "#333";
+    ctx.strokeRect(450, 430, 150, 20);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(`${taskProgress}%`, 515, 445);
+  }
+}
+
+function drawWorld() {
+  drawRoom();
+
+  if (gameState === "SLEEPING") {
+    drawSprite(sleepingSprite, 65, 80, 4);
+    ctx.fillStyle = "#333";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("Z z z . . .", 90, 75);
+  } else if (gameState === "FREE") {
+    drawSprite(standingSprite, playerX, playerY, pixelScale);
+  } else if (gameState === "STUDYING") {
+    drawSprite(sittingSprite, 475, 75, 4);
+    ctx.fillStyle = "#000";
+    ctx.font = "bold 12px monospace";
+    ctx.fillText("const code = 1;", 490, 40);
+  } else if (gameState === "DINING") {
+    drawSprite(sittingSprite, 450, 265, 4);
+    ctx.fillStyle = "#e63946";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("♥ 🍕 ♥", 480, 235);
+  }
+
+  if (gameState === "WIN") {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#f4a261";
+    ctx.font = "bold 28px sans-serif";
+    ctx.fillText("✨ Perfect Day Completed! ✨", 130, 210);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "16px sans-serif";
+    ctx.fillText("Woke up on time, built the project, and celebrated with food!", 100, 250);
   }
 }
 
 function gameLoop() {
   update();
   drawWorld();
-  drawSprite(sprite, playerX, playerY, pixelScale);
   requestAnimationFrame(gameLoop);
 }
 
