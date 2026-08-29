@@ -3,8 +3,8 @@
 <head>
 <title>My Perfect Day</title>
 <style>
-  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#241722; font-family: sans-serif; }
-  canvas { border: 4px solid #b5838d; image-rendering: pixelated; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#1e152a; font-family: sans-serif; }
+  canvas { border: 4px solid #ffb5a7; image-rendering: pixelated; box-shadow: 0 15px 35px rgba(0,0,0,0.7); }
 </style>
 </head>
 <body>
@@ -17,11 +17,15 @@ const ctx = canvas.getContext('2d');
 const colors = {
   1: '#1a1a1a',
   2: '#F2C6A0',
-  3: '#E56B6F',
+  3: '#ff758f',
   4: '#000000',
   5: '#FFFFFF',
   6: '#F4A261',
-  7: '#588157'
+  7: '#588157',
+  8: '#ffccd5',
+  9: '#7209b7',
+  10: '#ffd166',
+  11: '#4cc9f0'
 };
 
 const standingSprite = [
@@ -30,7 +34,7 @@ const standingSprite = [
   [1,1,1,1,1,1,1,1,1,1],
   [1,1,2,2,2,2,2,2,1,1],
   [1,1,2,4,2,2,4,2,1,1],
-  [1,1,2,2,2,2,2,2,1,1],
+  [1,1,2,8,2,2,8,2,1,1],
   [0,1,2,2,2,2,2,2,1,0],
   [0,0,3,3,3,3,3,3,0,0],
   [0,3,3,3,3,3,3,3,3,0],
@@ -45,10 +49,10 @@ const sleepingSprite = [
   [0,0,1,1,1,1,0,0,0,0,0,0,0],
   [0,1,1,2,2,1,1,0,0,0,0,0,0],
   [1,1,2,4,2,2,1,1,0,0,0,0,0],
-  [1,1,2,2,2,2,1,1,5,5,5,5,5],
-  [0,1,1,2,2,1,1,5,5,5,5,5,5],
-  [0,0,1,1,1,1,5,5,5,5,5,5,5],
-  [0,0,0,0,0,5,5,5,5,5,5,5,5]
+  [1,1,2,8,2,2,1,1,8,8,8,8,8],
+  [0,1,1,2,2,1,1,8,8,8,8,8,8],
+  [0,0,1,1,1,1,8,8,8,8,8,8,8],
+  [0,0,0,0,0,8,8,8,8,8,8,8,8]
 ];
 
 const sittingSprite = [
@@ -57,7 +61,7 @@ const sittingSprite = [
   [1,1,1,1,1,1,1,1,1,1],
   [1,1,2,2,2,2,2,2,1,1],
   [1,1,2,4,2,2,4,2,1,1],
-  [1,1,2,2,2,2,2,2,1,1],
+  [1,1,2,8,2,2,8,2,1,1],
   [0,0,3,3,3,3,3,3,0,0],
   [0,3,3,3,3,3,3,3,3,0],
   [0,3,3,3,3,3,3,3,3,0],
@@ -66,12 +70,22 @@ const sittingSprite = [
 ];
 
 const catSprite = [
-  [6,0,0,6],
-  [6,6,6,6],
-  [6,4,6,4],
-  [6,6,6,6],
-  [6,6,6,6],
-  [0,6,0,6]
+  [6,0,0,0,6],
+  [6,6,6,6,6],
+  [6,4,6,4,6],
+  [6,8,6,8,6],
+  [6,6,6,6,6],
+  [6,6,6,6,6],
+  [0,6,0,6,0]
+];
+
+const bobaSprite = [
+  [0,5,5,0],
+  [11,11,11,11],
+  [10,10,10,10],
+  [10,4,10,4],
+  [10,10,10,10],
+  [0,10,10,0]
 ];
 
 const plantSprite = [
@@ -89,7 +103,8 @@ let playerY = 90;
 let speed = 3.5;
 let taskProgress = 0;
 let promptText = "Press SPACE to Wake Up & Start Your Day!";
-let dialogText = "Zzz... Sleeping peacefully in cozy bed.";
+let dialogText = "Zzz... Sleeping under cozy pink blanket.";
+let frameCount = 0;
 
 const keysPressed = {};
 
@@ -109,7 +124,7 @@ function handleAction() {
     gameState = "FREE";
     playerX = 80;
     playerY = 160;
-    dialogText = "Good morning! Head to your study table to code.";
+    dialogText = "Good morning! Head to your pastel desk to build your project.";
     promptText = "";
     return;
   }
@@ -118,12 +133,12 @@ function handleAction() {
     if (playerX > 430 && playerX < 530 && playerY > 50 && playerY < 130) {
       gameState = "STUDYING";
       taskProgress = 0;
-      dialogText = "Coding hard for the hackathon... Keep pressing SPACE to finish!";
+      dialogText = "Coding hard for the hackathon... Keep tapping SPACE to finish!";
     } else if (playerX > 200 && playerX < 360 && playerY > 230 && playerY < 340) {
       if (taskProgress >= 100) {
         gameState = "WATCHING";
         taskProgress = 0;
-        dialogText = "Watching F.R.I.E.N.D.S with delicious snacks & dinner!";
+        dialogText = "Binging F.R.I.E.N.D.S with boba & yummy ramen dinner!";
       } else {
         dialogText = "You need to finish your study & code task first!";
       }
@@ -137,7 +152,7 @@ function handleAction() {
       gameState = "FREE";
       playerX = 420;
       playerY = 130;
-      dialogText = "Coding completed! Go sit on the cozy sofa to watch FRIENDS & eat.";
+      dialogText = "Coding done! Head to the cozy sofa to binge FRIENDS & chill.";
     }
     return;
   }
@@ -146,12 +161,13 @@ function handleAction() {
     taskProgress += 25;
     if (taskProgress >= 100) {
       gameState = "WIN";
-      dialogText = "Watched iconic FRIENDS episodes and had dinner. Perfect day!";
+      dialogText = "Watched classic FRIENDS episodes with cozy dinner. The Perfect Day!";
     }
   }
 }
 
 function update() {
+  frameCount++;
   if (gameState !== "FREE") return;
 
   if (keysPressed['ArrowUp'] || keysPressed['w']) playerY -= speed;
@@ -184,26 +200,75 @@ function drawSprite(grid, offsetX, offsetY, scale) {
 }
 
 function drawRoom() {
-  ctx.fillStyle = "#ffeedd";
+  ctx.fillStyle = "#fff0f3";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#ffd8be";
+  ctx.fillStyle = "#ffccd5";
   for (let i = 0; i < canvas.height; i += 28) {
     ctx.fillRect(0, i, canvas.width, 2);
   }
 
-  ctx.fillStyle = "#e5989b";
+  ctx.strokeStyle = "#ffe5ec";
+  ctx.lineWidth = 1;
+  for (let i = 0; i < canvas.width; i += 28) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, canvas.height);
+    ctx.stroke();
+  }
+
+  const fairyColors = ["#ffd166", "#ff758f", "#4cc9f0", "#7209b7", "#06d6a0"];
+  for (let i = 20; i < 620; i += 30) {
+    let glow = (Math.sin(frameCount * 0.05 + i) + 1) * 2;
+    ctx.fillStyle = fairyColors[(i / 30) % fairyColors.length];
+    ctx.beginPath();
+    ctx.arc(i, 12 + Math.sin(i * 0.1) * 4, 3 + glow, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#c9ada7";
+  ctx.fillRect(250, 15, 140, 75);
+  ctx.fillStyle = "#4a4e69";
+  ctx.fillRect(255, 20, 130, 65);
+  
+  ctx.fillStyle = "#ffb703";
   ctx.beginPath();
-  ctx.ellipse(320, 210, 100, 50, 0, 0, Math.PI * 2);
+  ctx.arc(285, 45, 14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  for(let s = 0; s < 6; s++) {
+    ctx.fillRect(320 + (s * 9) % 55, 30 + (s * 7) % 40, 2, 2);
+  }
+
+  ctx.fillStyle = "#ffccd5";
+  ctx.beginPath();
+  ctx.ellipse(320, 210, 110, 55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffb3c1";
+  ctx.beginPath();
+  ctx.ellipse(320, 210, 95, 45, 0, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.fillStyle = "#b5838d";
   ctx.fillRect(40, 60, 110, 85);
   ctx.fillStyle = "#ffb4a2";
   ctx.fillRect(45, 65, 30, 75);
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(50, 75, 20, 25);
+  ctx.fillRect(50, 105, 20, 25);
   ctx.fillStyle = "#6d6875";
   ctx.font = "bold 11px sans-serif";
-  ctx.fillText("Cozy Bed", 70, 50);
+  ctx.fillText("Cozy Bed 🌙", 65, 50);
+
+  ctx.fillStyle = "#ff758f";
+  ctx.beginPath();
+  ctx.arc(95, 120, 6, 0, Math.PI * 2);
+  ctx.arc(105, 120, 6, 0, Math.PI * 2);
+  ctx.arc(100, 128, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#000";
+  ctx.fillRect(97, 123, 2, 2);
+  ctx.fillRect(102, 123, 2, 2);
 
   ctx.fillStyle = "#e07a5f";
   ctx.fillRect(470, 60, 120, 70);
@@ -211,49 +276,60 @@ function drawRoom() {
   ctx.fillRect(510, 75, 42, 28);
   ctx.fillStyle = "#a8dadc";
   ctx.fillRect(514, 78, 34, 22);
+  ctx.fillStyle = "#ffbe0b";
+  ctx.fillRect(560, 65, 16, 12);
+  ctx.fillStyle = "#f3722c";
+  ctx.fillRect(560, 78, 16, 8);
   ctx.fillStyle = "#6d6875";
-  ctx.fillText("Study & Code Desk", 475, 50);
+  ctx.fillText("Aesthetic Desk ✨", 480, 50);
+
+  drawSprite(bobaSprite, 480, 70, 3);
 
   ctx.fillStyle = "#3d405b";
   ctx.fillRect(230, 360, 180, 12);
   ctx.fillStyle = "#111";
   ctx.fillRect(250, 315, 140, 45);
-  ctx.fillStyle = "#457b9d";
+  ctx.fillStyle = "#7209b7";
   ctx.fillRect(255, 320, 130, 35);
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#ffd166";
   ctx.font = "bold 10px sans-serif";
   ctx.fillText("F · R · I · E · N · D · S", 262, 342);
 
-  ctx.fillStyle = "#8338ec";
+  ctx.fillStyle = "#ff85a1";
   ctx.fillRect(250, 240, 140, 45);
-  ctx.fillStyle = "#ffbe0b";
+  ctx.fillStyle = "#f72585";
+  ctx.fillRect(240, 240, 10, 45);
+  ctx.fillRect(390, 240, 10, 45);
+  ctx.fillStyle = "#ffccd5";
   ctx.fillRect(260, 245, 20, 20);
   ctx.fillRect(350, 245, 20, 20);
   ctx.fillStyle = "#6d6875";
-  ctx.fillText("Sofa & TV Zone", 280, 230);
+  ctx.fillText("Sofa & TV Zone 📺", 270, 230);
 
   ctx.fillStyle = "#d4a373";
   ctx.fillRect(270, 290, 100, 20);
-  ctx.fillStyle = "#e63946";
+  ctx.fillStyle = "#ff595e";
   ctx.beginPath();
   ctx.arc(295, 300, 7, 0, Math.PI * 2);
-  ctx.arc(345, 300, 7, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = "#ffbe0b";
+  ctx.fillRect(335, 294, 18, 12);
 
   drawSprite(plantSprite, 180, 65, 4);
   drawSprite(plantSprite, 420, 65, 4);
-  drawSprite(plantSprite, 580, 330, 4);
+  drawSprite(plantSprite, 585, 330, 4);
 
-  drawSprite(catSprite, 140, 320, 4);
-  ctx.fillStyle = "#e07a5f";
+  drawSprite(catSprite, 135, 315, 4);
+  ctx.fillStyle = "#ffb4a2";
   ctx.beginPath();
-  ctx.arc(148, 348, 14, 0, Math.PI * 2);
-  ctx.strokeStyle = "#b5838d";
+  ctx.arc(145, 342, 18, 0, Math.PI * 2);
+  ctx.strokeStyle = "#e5989b";
+  ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
   ctx.fillRect(15, 415, 610, 55);
-  ctx.strokeStyle = "#6d6875";
+  ctx.strokeStyle = "#ff758f";
   ctx.lineWidth = 3;
   ctx.strokeRect(15, 415, 610, 55);
 
@@ -262,11 +338,11 @@ function drawRoom() {
   ctx.fillText(promptText ? promptText : dialogText, 30, 447);
 
   if (gameState === "STUDYING" || gameState === "WATCHING") {
-    ctx.fillStyle = "#ddd";
+    ctx.fillStyle = "#ffe5ec";
     ctx.fillRect(450, 430, 150, 20);
-    ctx.fillStyle = "#e76f51";
+    ctx.fillStyle = "#ff4d6d";
     ctx.fillRect(450, 430, (taskProgress / 100) * 150, 20);
-    ctx.strokeStyle = "#333";
+    ctx.strokeStyle = "#c9184a";
     ctx.strokeRect(450, 430, 150, 20);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 11px sans-serif";
@@ -279,34 +355,34 @@ function drawWorld() {
 
   if (gameState === "SLEEPING") {
     drawSprite(sleepingSprite, 65, 80, 4);
-    ctx.fillStyle = "#333";
-    ctx.font = "bold 16px sans-serif";
-    ctx.fillText("Z z z . . .", 90, 75);
+    ctx.fillStyle = "#ff4d6d";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText("z Z z . . ♡", 85, 75);
   } else if (gameState === "FREE") {
     drawSprite(standingSprite, playerX, playerY, pixelScale);
   } else if (gameState === "STUDYING") {
     drawSprite(sittingSprite, 485, 75, 4);
-    ctx.fillStyle = "#2a9d8f";
+    ctx.fillStyle = "#7209b7";
     ctx.font = "bold 12px monospace";
-    ctx.fillText("<Coding/>", 500, 40);
+    ctx.fillText("</> ☕ ✨", 495, 40);
   } else if (gameState === "WATCHING") {
     drawSprite(sittingSprite, 295, 235, 4);
-    ctx.fillStyle = "#e63946";
+    ctx.fillStyle = "#ff006e";
     ctx.font = "bold 16px sans-serif";
-    ctx.fillText("🍿 📺 🍜", 290, 220);
+    ctx.fillText("🍿 🧋 🍜 💖", 270, 220);
   }
 
   if (gameState === "WIN") {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+    ctx.fillStyle = "rgba(25, 10, 30, 0.9)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "#f4a261";
+    ctx.fillStyle = "#ff758f";
     ctx.font = "bold 28px sans-serif";
-    ctx.fillText("✨ Perfect Day Completed! ✨", 130, 210);
+    ctx.fillText("🌸 Perfect Day Completed! 🌸", 125, 210);
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "16px sans-serif";
-    ctx.fillText("Woke up well, built your hackathon code, and binged FRIENDS with good food!", 60, 250);
+    ctx.fillText("Woke up cozy, crushed hackathon coding, & chilled with FRIENDS!", 80, 250);
   }
 }
 
