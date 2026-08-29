@@ -3,8 +3,8 @@
 <head>
 <title>My Perfect Day</title>
 <style>
-  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#FFF6E3; }
-  canvas { border: 4px solid #6B4226; image-rendering: pixelated; }
+  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#FFF6E3; font-family: sans-serif; }
+  canvas { border: 4px solid #6B4226; image-rendering: pixelated; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
 </style>
 </head>
 <body>
@@ -14,16 +14,13 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
-// each number = a color. 0 = transparent (skip it)
 const colors = {
-  1: '#1a1a1a', // black hair / pants
-  2: '#F2C6A0', // skin
-  3: '#3B82C4', // blue shirt
-  4: '#000000'  // outline/eyes
+  1: '#1a1a1a',
+  2: '#F2C6A0',
+  3: '#3B82C4',
+  4: '#000000'
 };
 
-// character grid — each row is one pixel-row of the sprite
-// 0 = empty, other numbers = colors above
 const sprite = [
   [0,0,1,1,1,1,1,1,0,0],
   [0,1,1,1,1,1,1,1,1,0],
@@ -39,26 +36,122 @@ const sprite = [
   [0,0,1,0,0,0,0,1,0,0],
   [0,0,1,0,0,0,0,1,0,0]
 ];
+
 const stations = [
-  {name: "Wake Up", x: 50, y: 50, w:60, h:60, color:"#F4A261", done:false},
-  {name: "Study + Code", x: 500, y: 50, w:60, h:60, color:"#8AB17D", done:false},
-  {name: "Friends + Dinner", x: 500, y: 350, w:  60, h:60, color:"#E07A5F", done:false},
+  {name: "1. Wake Up & Chai", text: "Had a fresh morning tea!", x: 50, y: 50, w:60, h:60, color:"#F4A261", done:false},
+  {name: "2. Hackathon & Code", text: "Built awesome features!", x: 500, y: 50, w:60, h:60, color:"#8AB17D", done:false},
+  {name: "3. Friends + Dinner", text: "Celebrated with good food!", x: 500, y: 350, w: 60, h:60, color:"#E07A5F", done:false},
 ];
-function drawWorld() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+const pixelScale = 6;
+const playerWidth = 10 * pixelScale;
+const playerHeight = 13 * pixelScale;
+let playerX = 280;
+let playerY = 200;
+const speed = 4;
+
+let activePrompt = "";
+let currentDialog = "Goal: Visit all stations to finish your Perfect Day!";
+
+const keysPressed = {};
+
+window.addEventListener('keydown', (e) => { 
+  keysPressed[e.key] = true; 
+  if (e.key === " " || e.key === "e" || e.key === "E") {
+    interact();
+  }
+});
+
+window.addEventListener('keyup', (e) => { 
+  keysPressed[e.key] = false; 
+});
+
+function checkOverlap(station) {
+  return (
+    playerX < station.x + station.w + 10 &&
+    playerX + playerWidth > station.x - 10 &&
+    playerY < station.y + station.h + 10 &&
+    playerY + playerHeight > station.y - 10
+  );
+}
+
+function interact() {
   stations.forEach(station => {
-    ctx.fillStyle = station.done ? "#ccc" : station.color;
-    ctx.fillRect(station.x, station.y, station.w, station.h);
-    ctx.fillStyle = "#000";
-    ctx.font = "12px Arial";
-    ctx.fillText(station.name, station.x - 10, station.y - 5);
+    if (checkOverlap(station) && !station.done) {
+      station.done = true;
+      currentDialog = station.text;
+    }
   });
 }
+
+function update() {
+  if (keysPressed['ArrowUp'] || keysPressed['w']) playerY -= speed;
+  if (keysPressed['ArrowDown'] || keysPressed['s']) playerY += speed;
+  if (keysPressed['ArrowLeft'] || keysPressed['a']) playerX -= speed;
+  if (keysPressed['ArrowRight'] || keysPressed['d']) playerX += speed;
+
+  if (playerX < 0) playerX = 0;
+  if (playerX + playerWidth > canvas.width) playerX = canvas.width - playerWidth;
+  if (playerY < 0) playerY = 0;
+  if (playerY + playerHeight > canvas.height) playerY = canvas.height - playerHeight;
+
+  activePrompt = "";
+  stations.forEach(station => {
+    if (checkOverlap(station) && !station.done) {
+      activePrompt = `Press SPACE to complete: ${station.name}`;
+    }
+  });
+}
+
+function drawWorld() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  stations.forEach(station => {
+    ctx.fillStyle = station.done ? "#A0A0A0" : station.color;
+    ctx.fillRect(station.x, station.y, station.w, station.h);
+    
+    ctx.strokeStyle = "#4A3525";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(station.x, station.y, station.w, station.h);
+
+    ctx.fillStyle = "#2B2B2B";
+    ctx.font = "bold 11px sans-serif";
+    ctx.fillText(station.name, station.x - 15, station.y - 8);
+    
+    if (station.done) {
+      ctx.fillStyle = "#27ae60";
+      ctx.fillText("✓ Done", station.x + 10, station.y + 35);
+    }
+  });
+
+  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.fillRect(20, 420, 600, 45);
+  ctx.strokeStyle = "#6B4226";
+  ctx.strokeRect(20, 420, 600, 45);
+
+  ctx.fillStyle = "#333";
+  ctx.font = "13px sans-serif";
+  ctx.fillText(activePrompt ? activePrompt : currentDialog, 35, 447);
+
+  const allDone = stations.every(s => s.done);
+  if (allDone) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#FFF";
+    ctx.font = "bold 26px sans-serif";
+    ctx.fillText("✨ Perfect Day Complete! ✨", 140, 230);
+
+    ctx.font = "15px sans-serif";
+    ctx.fillText("You balanced health, work, and relationships!", 160, 265);
+  }
+}
+
 function drawSprite(grid, offsetX, offsetY, pixelSize) {
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[row].length; col++) {
       const colorCode = grid[row][col];
-      if (colorCode === 0) continue; // skip empty pixels
+      if (colorCode === 0) continue;
       ctx.fillStyle = colors[colorCode];
       ctx.fillRect(
         offsetX + col * pixelSize,
@@ -70,28 +163,11 @@ function drawSprite(grid, offsetX, offsetY, pixelSize) {
   }
 }
 
-// player position
-let playerX = 300;
-let playerY = 200;
-const speed = 5;
-
-// track which keys are held down
-const keysPressed = {};
-window.addEventListener('keydown', (e) => { keysPressed[e.key] = true; });
-window.addEventListener('keyup', (e) => { keysPressed[e.key] = false; });
-
-function update() {
-  if (keysPressed['ArrowUp']) playerY -= speed;
-  if (keysPressed['ArrowDown']) playerY += speed;
-  if (keysPressed['ArrowLeft']) playerX -= speed;
-  if (keysPressed['ArrowRight']) playerX += speed;
-}
-
 function gameLoop() {
   update();
-  drawWorld();                      // background + stations
-  drawSprite(sprite, playerX, playerY, 10);  // player on top
-  requestAnimationFrame(gameLoop);  // repeat ~60x/sec
+  drawWorld();
+  drawSprite(sprite, playerX, playerY, pixelScale);
+  requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
