@@ -3,8 +3,8 @@
 <head>
 <title>My Perfect Day</title>
 <style>
-  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#2c1810; font-family: sans-serif; }
-  canvas { border: 4px solid #d4a373; image-rendering: pixelated; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  body { margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#241722; font-family: sans-serif; }
+  canvas { border: 4px solid #b5838d; image-rendering: pixelated; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
 </style>
 </head>
 <body>
@@ -17,11 +17,11 @@ const ctx = canvas.getContext('2d');
 const colors = {
   1: '#1a1a1a',
   2: '#F2C6A0',
-  3: '#3B82C4',
+  3: '#E56B6F',
   4: '#000000',
   5: '#FFFFFF',
-  6: '#E76F51',
-  7: '#E9C46A'
+  6: '#F4A261',
+  7: '#588157'
 };
 
 const standingSprite = [
@@ -65,30 +65,31 @@ const sittingSprite = [
   [0,0,1,0,0,0,0,1,0,0]
 ];
 
-const friendSprite = [
-  [0,0,6,6,6,6,6,6,0,0],
-  [0,6,6,6,6,6,6,6,6,0],
-  [6,6,6,6,6,6,6,6,6,6],
-  [6,6,2,2,2,2,2,2,6,6],
-  [6,6,2,4,2,2,4,2,6,6],
-  [6,6,2,2,2,2,2,2,6,6],
-  [0,6,2,2,2,2,2,2,6,0],
-  [0,0,7,7,7,7,7,7,0,0],
-  [0,7,7,7,7,7,7,7,7,0],
-  [0,7,7,7,7,7,7,7,7,0],
-  [0,7,7,7,7,7,7,7,7,0],
-  [0,0,1,0,0,0,0,1,0,0],
-  [0,0,1,0,0,0,0,1,0,0]
+const catSprite = [
+  [6,0,0,6],
+  [6,6,6,6],
+  [6,4,6,4],
+  [6,6,6,6],
+  [6,6,6,6],
+  [0,6,0,6]
+];
+
+const plantSprite = [
+  [0,7,7,0],
+  [7,7,7,7],
+  [0,7,7,0],
+  [0,6,6,0],
+  [0,6,6,0]
 ];
 
 const pixelScale = 4;
 let gameState = "SLEEPING";
 let playerX = 85;
 let playerY = 90;
-let speed = 3;
+let speed = 3.5;
 let taskProgress = 0;
 let promptText = "Press SPACE to Wake Up & Start Your Day!";
-let dialogText = "Zzz... Fast asleep in bed.";
+let dialogText = "Zzz... Sleeping peacefully in cozy bed.";
 
 const keysPressed = {};
 
@@ -108,7 +109,7 @@ function handleAction() {
     gameState = "FREE";
     playerX = 80;
     playerY = 160;
-    dialogText = "Good morning! Head to the study desk to hack & study.";
+    dialogText = "Good morning! Head to your study table to code.";
     promptText = "";
     return;
   }
@@ -118,11 +119,11 @@ function handleAction() {
       gameState = "STUDYING";
       taskProgress = 0;
       dialogText = "Coding hard for the hackathon... Keep pressing SPACE to finish!";
-    } else if (playerX > 400 && playerX < 540 && playerY > 260 && playerY < 360) {
+    } else if (playerX > 200 && playerX < 360 && playerY > 230 && playerY < 340) {
       if (taskProgress >= 100) {
-        gameState = "DINING";
+        gameState = "WATCHING";
         taskProgress = 0;
-        dialogText = "Having dinner and laughing with your best friend!";
+        dialogText = "Watching F.R.I.E.N.D.S with delicious snacks & dinner!";
       } else {
         dialogText = "You need to finish your study & code task first!";
       }
@@ -136,16 +137,16 @@ function handleAction() {
       gameState = "FREE";
       playerX = 420;
       playerY = 130;
-      dialogText = "Coding completed! Now go down to meet your friend for dinner.";
+      dialogText = "Coding completed! Go sit on the cozy sofa to watch FRIENDS & eat.";
     }
     return;
   }
 
-  if (gameState === "DINING") {
+  if (gameState === "WATCHING") {
     taskProgress += 25;
     if (taskProgress >= 100) {
       gameState = "WIN";
-      dialogText = "You finished your tasks and enjoyed your evening. The Perfect Day!";
+      dialogText = "Watched iconic FRIENDS episodes and had dinner. Perfect day!";
     }
   }
 }
@@ -161,13 +162,13 @@ function update() {
   if (playerX < 20) playerX = 20;
   if (playerX > 580) playerX = 580;
   if (playerY < 30) playerY = 30;
-  if (playerY > 370) playerY = 370;
+  if (playerY > 360) playerY = 360;
 
   promptText = "";
   if (playerX > 430 && playerX < 530 && playerY > 50 && playerY < 130) {
     promptText = taskProgress < 100 ? "Press SPACE to Sit & Code" : "Coding Done!";
-  } else if (playerX > 400 && playerX < 540 && playerY > 260 && playerY < 360) {
-    promptText = "Press SPACE to Eat Dinner with Friend";
+  } else if (playerX > 200 && playerX < 360 && playerY > 230 && playerY < 340) {
+    promptText = "Press SPACE to Watch FRIENDS & Eat Dinner";
   }
 }
 
@@ -183,57 +184,87 @@ function drawSprite(grid, offsetX, offsetY, scale) {
 }
 
 function drawRoom() {
-  ctx.fillStyle = "#faedcd";
+  ctx.fillStyle = "#ffeedd";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#d4a373";
-  for (let i = 0; i < canvas.height; i += 32) {
+  ctx.fillStyle = "#ffd8be";
+  for (let i = 0; i < canvas.height; i += 28) {
     ctx.fillRect(0, i, canvas.width, 2);
   }
 
-  ctx.fillStyle = "#ccd5ae";
-  ctx.fillRect(40, 60, 110, 80);
-  ctx.fillStyle = "#e9d8a6";
-  ctx.fillRect(45, 65, 30, 70);
-  ctx.fillStyle = "#3d405b";
-  ctx.font = "bold 12px sans-serif";
-  ctx.fillText("Bed", 80, 50);
+  ctx.fillStyle = "#e5989b";
+  ctx.beginPath();
+  ctx.ellipse(320, 210, 100, 50, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  ctx.fillStyle = "#9c6644";
-  ctx.fillRect(460, 60, 120, 70);
-  ctx.fillStyle = "#2b2d42";
-  ctx.fillRect(500, 75, 40, 26);
-  ctx.fillStyle = "#64dfdf";
-  ctx.fillRect(503, 78, 34, 20);
-  ctx.fillStyle = "#3d405b";
-  ctx.fillText("Study / Code Desk", 460, 50);
+  ctx.fillStyle = "#b5838d";
+  ctx.fillRect(40, 60, 110, 85);
+  ctx.fillStyle = "#ffb4a2";
+  ctx.fillRect(45, 65, 30, 75);
+  ctx.fillStyle = "#6d6875";
+  ctx.font = "bold 11px sans-serif";
+  ctx.fillText("Cozy Bed", 70, 50);
 
-  ctx.fillStyle = "#b08968";
-  ctx.fillRect(440, 270, 140, 75);
+  ctx.fillStyle = "#e07a5f";
+  ctx.fillRect(470, 60, 120, 70);
+  ctx.fillStyle = "#22223b";
+  ctx.fillRect(510, 75, 42, 28);
+  ctx.fillStyle = "#a8dadc";
+  ctx.fillRect(514, 78, 34, 22);
+  ctx.fillStyle = "#6d6875";
+  ctx.fillText("Study & Code Desk", 475, 50);
+
+  ctx.fillStyle = "#3d405b";
+  ctx.fillRect(230, 360, 180, 12);
+  ctx.fillStyle = "#111";
+  ctx.fillRect(250, 315, 140, 45);
+  ctx.fillStyle = "#457b9d";
+  ctx.fillRect(255, 320, 130, 35);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 10px sans-serif";
+  ctx.fillText("F · R · I · E · N · D · S", 262, 342);
+
+  ctx.fillStyle = "#8338ec";
+  ctx.fillRect(250, 240, 140, 45);
+  ctx.fillStyle = "#ffbe0b";
+  ctx.fillRect(260, 245, 20, 20);
+  ctx.fillRect(350, 245, 20, 20);
+  ctx.fillStyle = "#6d6875";
+  ctx.fillText("Sofa & TV Zone", 280, 230);
+
+  ctx.fillStyle = "#d4a373";
+  ctx.fillRect(270, 290, 100, 20);
   ctx.fillStyle = "#e63946";
   ctx.beginPath();
-  ctx.arc(490, 305, 14, 0, Math.PI * 2);
-  ctx.arc(530, 305, 14, 0, Math.PI * 2);
+  ctx.arc(295, 300, 7, 0, Math.PI * 2);
+  ctx.arc(345, 300, 7, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "#3d405b";
-  ctx.fillText("Dinner Table", 470, 260);
 
-  drawSprite(friendSprite, 530, 240, 4);
+  drawSprite(plantSprite, 180, 65, 4);
+  drawSprite(plantSprite, 420, 65, 4);
+  drawSprite(plantSprite, 580, 330, 4);
+
+  drawSprite(catSprite, 140, 320, 4);
+  ctx.fillStyle = "#e07a5f";
+  ctx.beginPath();
+  ctx.arc(148, 348, 14, 0, Math.PI * 2);
+  ctx.strokeStyle = "#b5838d";
+  ctx.stroke();
 
   ctx.fillStyle = "rgba(255, 255, 255, 0.95)";
   ctx.fillRect(15, 415, 610, 55);
-  ctx.strokeStyle = "#6B4226";
+  ctx.strokeStyle = "#6d6875";
   ctx.lineWidth = 3;
   ctx.strokeRect(15, 415, 610, 55);
 
-  ctx.fillStyle = "#1d3557";
+  ctx.fillStyle = "#22223b";
   ctx.font = "bold 13px sans-serif";
   ctx.fillText(promptText ? promptText : dialogText, 30, 447);
 
-  if (gameState === "STUDYING" || gameState === "DINING") {
+  if (gameState === "STUDYING" || gameState === "WATCHING") {
     ctx.fillStyle = "#ddd";
     ctx.fillRect(450, 430, 150, 20);
-    ctx.fillStyle = "#2a9d8f";
+    ctx.fillStyle = "#e76f51";
     ctx.fillRect(450, 430, (taskProgress / 100) * 150, 20);
     ctx.strokeStyle = "#333";
     ctx.strokeRect(450, 430, 150, 20);
@@ -254,15 +285,15 @@ function drawWorld() {
   } else if (gameState === "FREE") {
     drawSprite(standingSprite, playerX, playerY, pixelScale);
   } else if (gameState === "STUDYING") {
-    drawSprite(sittingSprite, 475, 75, 4);
-    ctx.fillStyle = "#000";
+    drawSprite(sittingSprite, 485, 75, 4);
+    ctx.fillStyle = "#2a9d8f";
     ctx.font = "bold 12px monospace";
-    ctx.fillText("const code = 1;", 490, 40);
-  } else if (gameState === "DINING") {
-    drawSprite(sittingSprite, 450, 265, 4);
+    ctx.fillText("<Coding/>", 500, 40);
+  } else if (gameState === "WATCHING") {
+    drawSprite(sittingSprite, 295, 235, 4);
     ctx.fillStyle = "#e63946";
     ctx.font = "bold 16px sans-serif";
-    ctx.fillText("♥ 🍕 ♥", 480, 235);
+    ctx.fillText("🍿 📺 🍜", 290, 220);
   }
 
   if (gameState === "WIN") {
@@ -275,7 +306,7 @@ function drawWorld() {
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "16px sans-serif";
-    ctx.fillText("Woke up on time, built the project, and celebrated with food!", 100, 250);
+    ctx.fillText("Woke up well, built your hackathon code, and binged FRIENDS with good food!", 60, 250);
   }
 }
 
