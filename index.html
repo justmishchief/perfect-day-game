@@ -39,7 +39,21 @@ const sprite = [
   [0,0,1,0,0,0,0,1,0,0],
   [0,0,1,0,0,0,0,1,0,0]
 ];
-
+const stations = [
+  {name: "Wake Up", x: 50, y: 50, w:60, h:60, color:"#F4A261", done:false},
+  {name: "Study + Code", x: 500, y: 50, w:60, h:60, color:"#8AB17D", done:false},
+  {name: "Friends + Dinner", x: 500, y: 350, w:  60, h:60, color:"#E07A5F", done:false},
+];
+function drawWorld() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stations.forEach(station => {
+    ctx.fillStyle = station.done ? "#ccc" : station.color;
+    ctx.fillRect(station.x, station.y, station.w, station.h);
+    ctx.fillStyle = "#000";
+    ctx.font = "12px Arial";
+    ctx.fillText(station.name, station.x - 10, station.y - 5);
+  });
+}
 function drawSprite(grid, offsetX, offsetY, pixelSize) {
   for (let row = 0; row < grid.length; row++) {
     for (let col = 0; col < grid[row].length; col++) {
@@ -56,22 +70,30 @@ function drawSprite(grid, offsetX, offsetY, pixelSize) {
   }
 }
 
-// draw once to test
 // player position
 let playerX = 300;
 let playerY = 200;
 const speed = 5;
 
-window.addEventListener('keydown',function(e){
-    if (e.key === 'ArrowUp') playerY -= speed;
-    if (e.key === 'ArrowDown') playerY += speed;
-    if (e.key === 'ArrowLeft') playerX -= speed;
-    if (e.key === 'ArrowRight') playerX += speed;
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // clear canvas
-    drawSprite(sprite, playerX, playerY, 10); // redraw sprite at new position
-});
-    
-    drawSprite(sprite, playerX, playerY, 10); // initial draw
-</script>
+// track which keys are held down
+const keysPressed = {};
+window.addEventListener('keydown', (e) => { keysPressed[e.key] = true; });
+window.addEventListener('keyup', (e) => { keysPressed[e.key] = false; });
+
+function update() {
+  if (keysPressed['ArrowUp']) playerY -= speed;
+  if (keysPressed['ArrowDown']) playerY += speed;
+  if (keysPressed['ArrowLeft']) playerX -= speed;
+  if (keysPressed['ArrowRight']) playerX += speed;
+}
+
+function gameLoop() {
+  update();
+  drawWorld();                      // background + stations
+  drawSprite(sprite, playerX, playerY, 10);  // player on top
+  requestAnimationFrame(gameLoop);  // repeat ~60x/sec
+}
+
+gameLoop();
 </body>
 </html>
