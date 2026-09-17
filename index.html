@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>My Perfect Day — Mishu's Loop</title>
 <style>
   :root {
@@ -12,55 +13,66 @@
     --dark-pink: #c9184a;
     --text-dark: #22223b;
   }
-  * { box-sizing: border-box; }
+  * { 
+    box-sizing: border-box; 
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
   body {
-    margin: 0; padding: 0;
+    margin: 0; padding: 10px;
     display: flex; justify-content: center; align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     background: var(--bg-dark);
     font-family: 'Segoe UI', sans-serif;
-    overflow: hidden;
+    overflow-x: hidden;
   }
   #gameContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     position: relative;
+    width: 100%;
+    max-width: 680px;
   }
   #hud {
-    width: 680px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
     position: relative;
+    padding: 0 40px 0 0;
   }
   #title {
     font-weight: 800;
-    font-size: 18px;
+    font-size: clamp(14px, 3.5vw, 18px);
     color: #ffccd5;
     letter-spacing: 0.5px;
+    text-align: center;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   #moodRow {
-    font-size: 12px;
+    font-size: clamp(10px, 2.8vw, 12px);
     color: #ffd166;
     font-weight: 700;
     background: rgba(255, 255, 255, 0.1);
     padding: 3px 14px;
     border-radius: 20px;
     border: 1px solid rgba(255,204,213,0.3);
+    text-align: center;
   }
   #checklist {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
     justify-content: center;
+    max-width: 100%;
   }
   .chip {
-    font-size: 11px;
-    padding: 3px 9px;
+    font-size: clamp(9px, 2.4vw, 11px);
+    padding: 2px 7px;
     border-radius: 14px;
     background: rgba(255,255,255,0.85);
     border: 1.5px solid #ffccd5;
@@ -99,15 +111,17 @@
     justify-content: center;
     transition: transform 0.2s ease, background 0.2s ease;
   }
-  #soundBtn:hover {
-    transform: scale(1.1);
-    background: rgba(255, 117, 143, 0.4);
+  #canvasWrap { 
+    position: relative; 
+    width: 100%;
+    max-width: 680px;
   }
-  #canvasWrap { position: relative; }
   canvas#game {
-    border: 4px solid var(--border-pink);
+    width: 100%;
+    height: auto;
+    border: 3px solid var(--border-pink);
     border-radius: 12px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.65);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.65);
     background: var(--pastel-pink);
     display: block;
     image-rendering: pixelated;
@@ -124,16 +138,16 @@
     color: #fff0f3;
     text-align: center;
     gap: 12px;
-    padding: 24px;
+    padding: 18px;
     animation: fadeIn .3s ease;
   }
   @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-  .overlay h1 { font-size: 26px; margin: 0; color: #ff758f; }
-  .overlay p { max-width: 440px; font-size: 14px; line-height: 1.6; margin: 0; color: #ffe5ec; }
-  .overlay .signature { font-style: italic; font-size: 13px; color: #ffd166; }
-  .btnRow { display: flex; gap: 12px; margin-top: 6px; }
+  .overlay h1 { font-size: clamp(18px, 4.5vw, 24px); margin: 0; color: #ff758f; }
+  .overlay p { max-width: 440px; font-size: clamp(12px, 3vw, 14px); line-height: 1.5; margin: 0; color: #ffe5ec; }
+  .overlay .signature { font-style: italic; font-size: clamp(11px, 2.5vw, 13px); color: #ffd166; }
+  .btnRow { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
   .gameBtn {
-    padding: 8px 20px;
+    padding: 8px 18px;
     border-radius: 20px;
     border: none;
     background: #ff758f;
@@ -145,7 +159,69 @@
   }
   .gameBtn:hover { background: #ff4d6d; }
   .gameBtn.secondary { background: transparent; border: 2px solid #ffd166; color: #ffd166; box-shadow: none; }
-  #endPostcard { border-radius: 10px; border: 3px solid #ffccd5; margin-top: 4px; }
+  #endPostcard { border-radius: 10px; border: 3px solid #ffccd5; margin-top: 4px; max-width: 75%; height: auto; }
+
+  /* Touch Controls (Mobile Only) */
+  #touchControls {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding: 0 10px;
+  }
+  @media (hover: none) and (pointer: coarse), (max-width: 768px) {
+    #touchControls { display: flex; }
+  }
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    grid-template-rows: repeat(3, 44px);
+    gap: 4px;
+  }
+  .touchBtn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1.5px solid #ffccd5;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .touchBtn:active {
+    background: #ff758f;
+    transform: scale(0.95);
+  }
+  .touchBtn.up    { grid-column: 2; grid-row: 1; }
+  .touchBtn.left  { grid-column: 1; grid-row: 2; }
+  .touchBtn.right { grid-column: 3; grid-row: 2; }
+  .touchBtn.down  { grid-column: 2; grid-row: 3; }
+
+  .actionBtn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #ff758f;
+    border: 3px solid #ffccd5;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(255,117,143,0.5);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+  }
+  .actionBtn:active {
+    background: #c9184a;
+    transform: scale(0.92);
+  }
 </style>
 </head>
 <body>
@@ -180,6 +256,20 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile On-Screen Controls -->
+  <div id="touchControls">
+    <div class="dpad">
+      <div class="touchBtn up" data-key="arrowup">▲</div>
+      <div class="touchBtn left" data-key="arrowleft">◀</div>
+      <div class="touchBtn right" data-key="arrowright">▶</div>
+      <div class="touchBtn down" data-key="arrowdown">▼</div>
+    </div>
+    <button class="actionBtn" id="mobileActionBtn">
+      <span>TAP</span>
+      <span style="font-size: 10px; opacity: 0.85;">(SPACE)</span>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -206,7 +296,6 @@ const C = {
   catColor: '#F4A261'
 };
 
-// Stations with clean sit & dismount spots
 const stations = [
   { id:'wake',         label:'Wake Up',         x:55,  y:65,  w:125, h:85,  kind:'bed',    icon:'☀️', sitX:100, sitY:110, dismountX:100, dismountY:175, faceDir:'down', item:'💤', line:"Stretch... 8:47am. Tap SPACE to wake up!" },
   { id:'shower_am',    label:'Morning Shower',  x:60,  y:320, w:100, h:80,  kind:'shower', icon:'🚿', sitX:105, sitY:365, dismountX:180, dismountY:365, faceDir:'down', item:'🫧', line:"Warm water running. Fresh morning reset! Tap SPACE!" },
@@ -217,13 +306,12 @@ const stations = [
   { id:'sleep',        label:'AC + Sleep',      x:55,  y:65,  w:125, h:85,  kind:'bed',    icon:'🌙', sitX:100, sitY:110, dismountX:100, dismountY:175, faceDir:'down', item:'🌙', line:"AC on, lights out. Tap SPACE to sleep..." }
 ];
 
-// PROPER SIZED SOLID OBSTACLES (Thoda buffer diya hai taaki player phas na sake)
 const solidObstacles = [
-  { x: 55,  y: 65,  w: 125, h: 80 },  // Bed frame
-  { x: 495, y: 60,  w: 125, h: 65 },  // Study Desk body
-  { x: 495, y: 215, w: 125, h: 70 },  // Coding Desk body
-  { x: 270, y: 340, w: 110, h: 25 },  // Coffee Table
-  { x: 260, y: 375, w: 130, h: 25 }   // TV Stand
+  { x: 55,  y: 65,  w: 125, h: 80 },
+  { x: 495, y: 60,  w: 125, h: 65 },
+  { x: 495, y: 215, w: 125, h: 70 },
+  { x: 270, y: 340, w: 110, h: 25 },
+  { x: 260, y: 375, w: 130, h: 25 }
 ];
 
 const moodLines = [
@@ -245,7 +333,6 @@ let promptText = "";
 let dialogText = "Zzz... Sleeping under cozy pink blanket.";
 let frameCount = 0;
 
-// ==================== CATCHY & SWEET TUNE ====================
 let audioCtx = null;
 let isAudioMuted = false;
 let musicTimer = null;
@@ -276,20 +363,10 @@ function playSweetNote(freq, time, dur, gainVal = 0.05) {
 
 function startSweetMelody() {
   const melody = [
-    { f: 523.25, d: 0.3 },
-    { f: 587.33, d: 0.3 },
-    { f: 659.25, d: 0.4 },
-    { f: 783.99, d: 0.5 },
-    { f: 659.25, d: 0.3 },
-    { f: 523.25, d: 0.4 },
-    { f: 440.00, d: 0.6 },
-    { f: 0,      d: 0.2 },
-    { f: 493.88, d: 0.3 },
-    { f: 523.25, d: 0.3 },
-    { f: 587.33, d: 0.4 },
-    { f: 659.25, d: 0.5 },
-    { f: 587.33, d: 0.3 },
-    { f: 523.25, d: 0.6 }
+    { f: 523.25, d: 0.3 }, { f: 587.33, d: 0.3 }, { f: 659.25, d: 0.4 }, { f: 783.99, d: 0.5 },
+    { f: 659.25, d: 0.3 }, { f: 523.25, d: 0.4 }, { f: 440.00, d: 0.6 }, { f: 0,      d: 0.2 },
+    { f: 493.88, d: 0.3 }, { f: 523.25, d: 0.3 }, { f: 587.33, d: 0.4 }, { f: 659.25, d: 0.5 },
+    { f: 587.33, d: 0.3 }, { f: 523.25, d: 0.6 }
   ];
 
   let noteIdx = 0;
@@ -337,7 +414,6 @@ soundBtn.addEventListener('click', () => {
   }
 });
 
-// ==================== PLAYER STATE ====================
 const player = {
   x: 100, y: 110, w: 20, h: 32, speed: 3.0, dir: 'down',
   walkFrame: 0, walkTimer: 0, moving: false,
@@ -387,6 +463,24 @@ window.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false;
 });
 
+// Touch & Mobile On-Screen Listeners
+document.querySelectorAll('.touchBtn').forEach(btn => {
+  const key = btn.getAttribute('data-key');
+  const press = (e) => { e.preventDefault(); keys[key] = true; };
+  const release = (e) => { e.preventDefault(); keys[key] = false; };
+
+  btn.addEventListener('touchstart', press, { passive: false });
+  btn.addEventListener('touchend', release, { passive: false });
+  btn.addEventListener('mousedown', press);
+  btn.addEventListener('mouseup', release);
+  btn.addEventListener('mouseleave', release);
+});
+
+const mobileAction = document.getElementById('mobileActionBtn');
+const triggerAction = (e) => { e.preventDefault(); handleAction(); };
+mobileAction.addEventListener('touchstart', triggerAction, { passive: false });
+mobileAction.addEventListener('mousedown', triggerAction);
+
 function activeStation() {
   if (gameOver || !gameStarted || currentStep >= stations.length) return null;
   return stations[currentStep];
@@ -401,7 +495,6 @@ function nearActiveStation() {
   return Math.sqrt(dx * dx + dy * dy) < Math.max(s.w, s.h) / 2 + 35;
 }
 
-// SMART FEET-ONLY COLLISION: Sirf pair takrayenge taaki upar ki body furniture se takra kar phas na jaye
 function checkCollision(nx, ny) {
   const feetBox = {
     x: nx + 3,
@@ -427,26 +520,24 @@ function handleAction() {
   if (!gameStarted || gameOver) return;
   playPop();
 
-  // Wake Up
   if (player.state === 'SLEEPING' && currentStep === 0) {
     taskProgress += 34;
     spawnBurst(115, 105);
     if (taskProgress >= 100) {
       player.state = 'FREE';
       player.x = 100;
-      player.y = 175; // Safely below bed in open space!
+      player.y = 175;
       completed[0] = true;
       currentStep = 1;
       taskProgress = 0;
       updateHUD();
       dialogText = "Good morning! Walk to shower stall (bottom-left) to freshen up.";
     } else {
-      dialogText = `Waking up... ${taskProgress}% cozy stretch! Keep tapping SPACE!`;
+      dialogText = `Waking up... ${taskProgress}% cozy stretch! Keep tapping!`;
     }
     return;
   }
 
-  // Sit on Chair / Sofa / Shower to start task
   if (player.state === 'FREE' && nearActiveStation()) {
     const s = stations[currentStep];
     player.state = 'WORKING';
@@ -460,7 +551,6 @@ function handleAction() {
     return;
   }
 
-  // Doing task while sitting
   if (player.state === 'WORKING') {
     taskProgress += 25;
     spawnBurst(player.x + player.w / 2, player.y);
@@ -482,7 +572,6 @@ function handleAction() {
         setTimeout(() => endGame(), 1100);
       } else {
         player.state = 'FREE';
-        // Dismount to safe open space
         player.x = s.dismountX;
         player.y = s.dismountY;
         player.dir = 'down';
@@ -554,11 +643,9 @@ function update() {
       let nextX = clamp(player.x + dx * player.speed, 25, W - 45);
       let nextY = clamp(player.y + dy * player.speed, 35, H - 95);
 
-      // Independent X movement
       if (!checkCollision(nextX, player.y)) {
         player.x = nextX;
       }
-      // Independent Y movement
       if (!checkCollision(player.x, nextY)) {
         player.y = nextY;
       }
@@ -589,15 +676,13 @@ function update() {
 
   promptText = "";
   if (player.state === 'SLEEPING') {
-    promptText = currentStep === 0 ? "Press SPACE to Wake Up & Start Your Day!" : "Press SPACE to sleep peacefully...";
+    promptText = currentStep === 0 ? "Tap TAP/SPACE to Wake Up & Start Your Day!" : "Tap TAP/SPACE to sleep peacefully...";
   } else if (player.state === 'WORKING') {
-    promptText = `Sitting & doing: ${stations[currentStep].label}! Tap SPACE`;
+    promptText = `Sitting & doing: ${stations[currentStep].label}! Tap TAP/SPACE`;
   } else if (nearActiveStation()) {
-    promptText = `Press SPACE to sit & begin: ${stations[currentStep].label}`;
+    promptText = `Tap TAP/SPACE to sit & begin: ${stations[currentStep].label}`;
   }
 }
-
-// ---------------- ROOM DRAWING ---------------- //
 
 function drawRoom() {
   ctx.fillStyle = C.floorBg; ctx.fillRect(0, 0, W, H);
@@ -610,7 +695,6 @@ function drawRoom() {
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
   }
 
-  // Fairy Lights
   const fairyColors = ["#ffd166", "#ff758f", "#4cc9f0", "#7209b7", "#06d6a0"];
   ctx.strokeStyle = "rgba(109, 104, 117, 0.35)"; ctx.lineWidth = 1.5;
   ctx.beginPath();
@@ -625,13 +709,11 @@ function drawRoom() {
     ctx.fill();
   }
 
-  // Center Pink Oval Rug
   ctx.fillStyle = "#ffccd5";
   ctx.beginPath(); ctx.ellipse(330, 200, 100, 48, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = "#ffb3c1";
   ctx.beginPath(); ctx.ellipse(330, 200, 85, 38, 0, 0, Math.PI * 2); ctx.fill();
 
-  // Wall AC Unit
   ctx.fillStyle = "#e2f1f8"; ctx.fillRect(290, 2, 95, 20);
   ctx.strokeStyle = "#b0cddb"; ctx.strokeRect(290, 2, 95, 20);
   ctx.fillStyle = "#78909c"; ctx.fillRect(300, 16, 75, 2);
@@ -646,7 +728,6 @@ function drawRoom() {
   drawPlant(195, 65);
   drawPlant(445, 65);
   drawPlant(W - 45, 335);
-
   drawCat(155, 235);
 }
 
@@ -705,7 +786,6 @@ function drawStations() {
       ctx.fillStyle = "#4cc9f0"; ctx.fillRect(s.x + 88, s.y + 42, 20, 18);
       drawBoba(s.x + 22, s.y + 20);
 
-      // Desk Chair
       ctx.fillStyle = "#c2826a"; ctx.fillRect(s.sitX + 2, s.sitY + 6, 22, 16);
       ctx.fillStyle = "#a85d42"; ctx.fillRect(s.sitX + 4, s.sitY - 2, 18, 8);
 
@@ -721,7 +801,6 @@ function drawStations() {
       ctx.fillText("npm run dev", s.x + 47, s.y + 40);
       ctx.fillStyle = "#ffbe0b"; ctx.fillRect(s.x + 105, s.y + 16, 16, 12);
 
-      // Coding Chair
       ctx.fillStyle = "#b07d62"; ctx.fillRect(s.sitX + 2, s.sitY + 6, 22, 16);
       ctx.fillStyle = "#8f573f"; ctx.fillRect(s.sitX + 4, s.sitY - 2, 18, 8);
 
@@ -730,7 +809,6 @@ function drawStations() {
       ctx.fillText("Hackathon Zone 💻", s.x + 15, s.y - 8);
     } 
     else if (s.kind === 'table') {
-      // Sofa
       ctx.fillStyle = "#ff85a1"; ctx.fillRect(s.x + 20, s.y, 140, 40);
       ctx.fillStyle = "#f72585";
       ctx.fillRect(s.x + 10, s.y, 10, 40);
@@ -739,14 +817,11 @@ function drawStations() {
       ctx.fillRect(s.x + 30, s.y + 8, 18, 18);
       ctx.fillRect(s.x + 132, s.y + 8, 18, 18);
 
-      // Coffee Table with Food (Noodles & Boba)
       ctx.fillStyle = "#d4a373"; ctx.fillRect(s.x + 40, s.y + 50, 100, 24);
-      // Noodle Bowl
       ctx.fillStyle = "#ff595e"; ctx.beginPath(); ctx.arc(s.x + 65, s.y + 62, 8, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = "#ffe6a7"; ctx.beginPath(); ctx.arc(s.x + 65, s.y + 61, 6, 0, Math.PI * 2); ctx.fill();
       drawBoba(s.x + 115, s.y + 45);
 
-      // TV
       ctx.fillStyle = "#111"; ctx.fillRect(s.x + 30, s.y + 80, 120, 26);
       ctx.fillStyle = "#7209b7"; ctx.fillRect(s.x + 34, s.y + 83, 112, 20);
       ctx.fillStyle = "#ffd166"; ctx.font = "bold 10px sans-serif";
@@ -803,8 +878,6 @@ function drawBoba(x, y) {
   ctx.beginPath(); ctx.arc(x + 8, y + 14, 1.8, 0, Math.PI * 2); ctx.fill();
 }
 
-// ---------------- CHARACTER DRAWING ---------------- //
-
 function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting = false, scale = 1) {
   ctx2.save();
   ctx2.translate(x, y);
@@ -815,7 +888,6 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
 
   const isSide = (dir === 'left' || dir === 'right');
 
-  // Legs
   ctx2.fillStyle = C.pants;
   if (isSitting) {
     if (dir === 'up') {
@@ -832,7 +904,6 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
     ctx2.fillRect(1 + step * 0.4, -13, 5, 13);
   }
 
-  // Torso / Shirt
   ctx2.fillStyle = isSide ? C.shirtSide : C.shirt;
   const torsoY = isSitting ? -24 : -28;
   if (!isSide) {
@@ -842,7 +913,6 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
     ctx2.fillRect(-8 + offX, torsoY, 16, 16);
   }
 
-  // Arms
   ctx2.fillStyle = C.skin;
   const armY = isSitting ? -18 : -21;
   if (isSitting) {
@@ -862,13 +932,11 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
     ctx2.beginPath(); ctx2.arc(armX, armY + armSwing, 3.5, 0, Math.PI * 2); ctx2.fill();
   }
 
-  // Head Base
   ctx2.fillStyle = C.skin;
   const headY = isSitting ? -32 : -35;
   const headX = isSide ? (dir === 'right' ? 2 : -2) : 0;
   ctx2.beginPath(); ctx2.arc(headX, headY, 11, 0, Math.PI * 2); ctx2.fill();
 
-  // Clean Solid Hair
   ctx2.fillStyle = C.hair;
 
   if (dir === 'up') {
@@ -890,11 +958,9 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
       ctx2.beginPath(); ctx2.arc(-4, headY, 1.4, 0, Math.PI * 2); ctx2.fill();
       ctx2.beginPath(); ctx2.arc(4, headY, 1.4, 0, Math.PI * 2); ctx2.fill();
     }
-    // Blush
     ctx2.fillStyle = "#ff758f";
     ctx2.fillRect(-7, headY + 2, 3, 2);
     ctx2.fillRect(4, headY + 2, 3, 2);
-    // Smile
     ctx2.strokeStyle = '#8b5e34'; ctx2.lineWidth = 1.1;
     ctx2.beginPath(); ctx2.arc(0, headY + 4, 2.5, 0.1, Math.PI - 0.1); ctx2.stroke();
   } 
@@ -911,7 +977,6 @@ function drawCharacter(ctx2, x, y, dir, walkFrame, moving, blinking, isSitting =
     if (!blinking) { ctx2.fillStyle = '#1a1a1a'; ctx2.beginPath(); ctx2.arc(-6, headY, 1.4, 0, Math.PI * 2); ctx2.fill(); }
   }
 
-  // ==================== HEAD BUBBLE ====================
   if (player.showBubble) {
     const by = headY - 26 + Math.sin(frameCount * 0.12) * 2.5;
 
@@ -960,7 +1025,16 @@ function drawBottomBar() {
   ctx.fillStyle = "#22223b";
   ctx.font = "bold 13px sans-serif";
   const displayLine = promptText ? promptText : dialogText;
-  ctx.fillText(displayLine, 28, 447);
+  
+  // Truncate cleanly for smaller display canvas width if needed
+  let printStr = displayLine;
+  if (ctx.measureText(printStr).width > W - 220) {
+    while (ctx.measureText(printStr + '...').width > W - 220 && printStr.length > 0) {
+      printStr = printStr.slice(0, -1);
+    }
+    printStr += '...';
+  }
+  ctx.fillText(printStr, 28, 447);
 
   if (player.state === 'WORKING' || player.state === 'SLEEPING') {
     const barX = W - 180, barY = 430, barW = 150, barH = 22;
@@ -1002,8 +1076,10 @@ function drawPostcard() {
   pctx.fillStyle = '#ffd166';
   pctx.beginPath(); pctx.arc(pw - 35, 30, 15, 0, Math.PI * 2); pctx.fill();
 
-  pctx.fillStyle = '#6d6875'; pctx.fillRect(0, ph - 34, pw, 34);
-  pctx.fillStyle = '#ff758f'; pctx.fillRect(0, ph - 48, pw, 4);
+  pctx.fillStyle = '#6d6875';
+  pctx.fillRect(0, ph - 34, pw, 34);
+  pctx.fillStyle = '#ff758f';
+  pctx.fillRect(0, ph - 48, pw, 4);
 
   drawCharacter(pctx, pw / 2, ph - 36, 'down', 0, false, false, false, 1.4);
 
@@ -1026,7 +1102,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   document.getElementById('introScreen').style.display = 'none';
   document.getElementById('hud').style.visibility = 'visible';
   gameStarted = true;
-  dialogText = "Zzz... Under the cozy blanket. Tap SPACE to wake up!";
+  dialogText = "Zzz... Under the cozy blanket. Tap TAP/SPACE to wake up!";
   initTune();
 });
 
@@ -1041,7 +1117,7 @@ document.getElementById('restartBtn').addEventListener('click', () => {
   particles = [];
   document.getElementById('endScreen').style.display = 'none';
   updateHUD();
-  dialogText = "Back in bed! Tap SPACE to wake up & live it again ☀️";
+  dialogText = "Back in bed! Tap TAP/SPACE to wake up & live it again ☀️";
 });
 
 document.getElementById('downloadBtn').addEventListener('click', () => {
